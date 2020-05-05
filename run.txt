@@ -1,0 +1,38 @@
+dd if=/dev/zero of=system.img bs=512 count=2880
+nasm bootloader.asm -o bootloader
+dd if=bootloader of=system.img bs=512 count=1 conv=notrunc
+dd if=map.img of=system.img bs=512 count=1 seek=1 conv=notrunc
+dd if=dir.img of=system.img bs=512 count=1 seek=2 conv=notrunc
+bcc -ansi -c -o kernel.o kernel.c
+nasm -f as86 kernel.asm -o kernel_asm.o
+ld86 -o kernel -d kernel.o kernel_asm.o
+dd if=kernel of=system.img bs=512 conv=notrunc seek=3
+gcc loadFile.c -o loadFile
+./loadFile milestone1
+bochs -f if2230.config
+
+bcc -ansi -c -o kernel.o kernel.c
+nasm -f as86 kernel.asm -o kernel_asm.o
+ld86 -o kernel -d kernel.o kernel_asm.o
+dd if=kernel of=system.img bs=512 conv=notrunc seek=3
+bochs -f if2230.config
+
+nasm bootloader.asm -o bootloader
+dd if=bootloader of=system.img bs=512 count=1 conv=notrunc
+dd if=map.img of=system.img bs=512 count=1 seek=256 conv=notrunc
+dd if=dir.img of=system.img bs=512 count=2 seek=257 conv=notrunc
+dd if=sectors.img of=system.img bs=512 count=1 seek=259 conv=notrunc
+bcc -ansi -c -o lib/text/text.o lib/text/text.c
+bcc -ansi -c -o lib/file/file.o lib/file/file.c
+bcc -ansi -c -o lib/folder/folder.o lib/folder/folder.c
+bcc -ansi -c -o lib/mat/mat.o lib/mat/mat.c
+bcc -ansi -c -o kernel.o kernel.c
+nasm -f as86 kernel.asm -o kernel_asm.o
+ld86 -o kernel -d kernel.o lib/text/text.o lib/file/file.o lib/folder/folder.o lib/mat/mat.o kernel_asm.o
+dd if=kernel of=system.img bs=512 conv=notrunc seek=1
+bochs -f if2230.config
+
+
+gcc loadFile.c -o loadFile
+
+./loadFile loadFile.txt
